@@ -1,15 +1,9 @@
-# Query-Only Graph-Based Query Performance Prediction (QPP)
+# Graph-Based Query Performance Prediction (QPP)
 
 This repository provides a PyTorch Geometric (PyG)-based implementation of a **Graph Neural Network (GNN)** framework for **Query Performance Prediction (QPP)**.  
-The model operates **only on query–query (Q–Q)** relationships, using similarity graphs constructed from dense embeddings of queries.  
-It predicts query difficulty or effectiveness metrics such as **MAP**, **NDCG**, or **MRR**.
+using similarity graphs constructed from dense embeddings of queries.  It predicts query difficulty or effectiveness metrics such as **MAP**.
 
 ---
-
-## 🔍 Overview
-
-Unlike standard heterogeneous graph models that consider both query–document (Q–D) and document–document (D–D) relations,  
-this version focuses exclusively on **query–query connectivity** for lightweight reasoning and interpretability.
 
 The code uses:
 - **PyTorch Geometric** for message passing
