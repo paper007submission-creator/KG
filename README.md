@@ -59,11 +59,19 @@ This script handles:
 ## 🧠 Manual Example
 
 ### 1️⃣ Build Query–Query Neighbors
+For both training and test query set these similarities should be included. For test set, change the query_file_search to the target test set.
+
 ```bash
 python sim_search.py   --query_file_main dataset/v1/queries.train.small.tsv   --query_file_search dataset/v1/queries.train.small.tsv   --output_file_json dataset/NNQ/NNQ_distilbert_train_V1.json   --model_name sentence-transformers/msmarco-distilbert-base-v4   --top_k 100
 ```
 
 ### 2️⃣ Build Graph
+Here we make the graph torch dataset. before using this, you should prepare the nearest queries from previous part also pass the run file in trec format also the evaluation file that has the MAP or Ndcg of the queries . for test and training set it should be doone. 
+
+```bash
+python make_dataset.py   --query_path dataset/v1/queries.train.small.tsv   --nnq_path dataset/NNQ/NNQ_distilbert_train_V1.json   --tsv_eval_path dataset/Bm25/eval/v1/msmarco_v1_train_eval_file.tsv_1000   --graph_dataset_path distilbert/MotherDataset_train_v1_distilbert.json
+```
+
 ```bash
 python dataset_builder.py   --graph_dataset_path dataset/KGQPP/.../MotherDataset_train_v1_distilbert.json   --out_path dataset/KGQPP/.../graph_train_10_ndcg.pt   --eval_measurement ndcg   --topk_qq 10
 ```
