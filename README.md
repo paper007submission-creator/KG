@@ -1,7 +1,7 @@
 # 🧠 Graph-Based Query Performance Prediction (QPP)
 
 This project implements a **Graph Neural Network (GNN)** framework for **Query Performance Prediction (QPP)** using **query–query (Q–Q)** similarity graphs under the **BM25** baseline.  
-It enables building Q–Q datasets, constructing graphs, training GCN/GAT models, and evaluating performance using correlation metrics.
+It enables building Q–Q datasets, constructing graphs, training GCN model, and evaluating performance using correlation metrics.
 
 ---
 
@@ -9,7 +9,7 @@ It enables building Q–Q datasets, constructing graphs, training GCN/GAT models
 
 - Constructs **query–query graphs** from nearest-neighbor relationships  
 - Uses **Sentence-Transformers** for embeddings  
-- Trains **GCN** or **GAT** to predict query effectiveness (MAP/NDCG)  
+- Trains **GCN** to predict query effectiveness (MAP/NDCG)  
 - Supports both **linear** and **MLP** prediction heads  
 - Fully automated through **SLURM job scripts**
 
