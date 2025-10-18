@@ -91,31 +91,4 @@ python correlation.py   --input dataset/KGQPP/.../cache_GCN_ndcg_linear_256   --
 
 ---
 
-## 🔁 Switching to GAT (Optional)
 
-Replace the GCN backbone with **GATv2Conv** in your script:
-```python
-from torch_geometric.nn import GATv2Conv
-```
-Adjust hidden size and heads as needed.
-
----
-
-## 🧾 Citation
-
-```bibtex
-@article{saleminezhad2025gnnqpp,
-  title={Graph-Based Query Performance Prediction via Query–Query Message Passing},
-  author={Saleminezhad, Abbas and Bagheri, Ebrahim},
-  year={2025},
-  journal={Under Review}
-}
-```
-
----
-
-## 👤 Author
-
-**Suren (Abbas) Salemi Nezhad**  
-Ph.D. Candidate, Toronto Metropolitan University  
-📧 suren.salemi@torontomu.ca
