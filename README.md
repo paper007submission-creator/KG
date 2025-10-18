@@ -38,7 +38,7 @@ class BaseGraphConv(nn.Module):
         self.conv2 = GraphConv(hid, hid, aggr='add')
         self.act = nn.ReLU()
         self.drop = nn.Dropout(0.2)
-
+```
 
 
 # 🧠 Graph-Based Query Performance Prediction (QPP) — Query-Only Pipeline
