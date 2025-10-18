@@ -65,12 +65,12 @@ python sim_search.py   --query_file_main dataset/v1/queries.train.small.tsv   --
 
 ### 2️⃣ Build Graph
 ```bash
-python dataset_builder_qq.py   --graph_dataset_path dataset/KGQPP/.../MotherDataset_train_v1_distilbert.json   --out_path dataset/KGQPP/.../graph_train_10_ndcg.pt   --eval_measurement ndcg   --topk_qq 10
+python dataset_builder.py   --graph_dataset_path dataset/KGQPP/.../MotherDataset_train_v1_distilbert.json   --out_path dataset/KGQPP/.../graph_train_10_ndcg.pt   --eval_measurement ndcg   --topk_qq 10
 ```
 
 ### 3️⃣ Train the Model
 ```bash
-python train_model_GCN_qq.py   --graph dataset/KGQPP/.../graph_train_10_ndcg.pt   --hid 256 --head linear --epochs 20 --train
+python train_model_GCN.py   --graph dataset/KGQPP/.../graph_train_10_ndcg.pt   --hid 256 --head linear --epochs 20 --train
 ```
 
 ### 4️⃣ Evaluate Correlations
