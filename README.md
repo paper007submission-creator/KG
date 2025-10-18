@@ -64,3 +64,19 @@ Each query node connects to its top-K similar neighbors based on dense embedding
 ---
 
 ## 📁 Project Structure
+
+GNN-QPP/
+│
+├── KGQPP_qq.sh                          # SLURM bash script (main pipeline)
+├── sim_search.py                        # Compute Q–Q similarity with FAISS
+├── make_dataset_qq.py                   # Build MotherDataset JSONs
+├── dataset_builder_qq.py                # Convert JSONs to PyG .pt graphs
+├── train_model_GCN_qq.py                # Train model (GCN backbone)
+├── train_model_GCN_qq_improved.py       # Alternative version with enhancements
+├── correlation.py                       # Compute correlation metrics
+│
+└── dataset/
+├── v1/                              # Query TSVs and supporting files
+├── NNQ/                             # Nearest neighbor JSONs
+├── Bm25/eval/                       # Evaluation metrics (MAP, NDCG)
+└── KGQPP/V1_BM25_OnlyQ/             # Graphs, checkpoints, results
