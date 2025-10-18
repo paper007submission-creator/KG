@@ -1,82 +1,121 @@
-# Graph-Based Query Performance Prediction (QPP)
+# 🧠 Graph-Based Query Performance Prediction (QPP)
 
-This repository provides a PyTorch Geometric (PyG)-based implementation of a **Graph Neural Network (GNN)** framework for **Query Performance Prediction (QPP)**.  
-using similarity graphs constructed from dense embeddings of queries.  It predicts query difficulty or effectiveness metrics such as **MAP**.
-
----
-
-The code uses:
-- **PyTorch Geometric** for message passing
-- **Sentence-Transformers** for dense query embeddings
-- **FAISS** for nearest neighbor search between queries
-- **Huber loss** for robust regression training
+This project implements a **Graph Neural Network (GNN)** framework for **Query Performance Prediction (QPP)** using **query–query (Q–Q)** similarity graphs under the **BM25** baseline.  
+It enables building Q–Q datasets, constructing graphs, training GCN/GAT models, and evaluating performance using correlation metrics.
 
 ---
 
-## 🧩 Graph Structure
+## ⚙️ Overview
 
-Each node represents a **query**, and edges encode **semantic similarity** between queries based on their dense embeddings.
-
-- **Nodes:** Queries  
-- **Edges:** Query–Query similarities (`('query', 'similar', 'query')`)  
-- **Edge weights:** Cosine similarity scores normalized by row-wise softmax
-
-The model passes messages between similar queries to predict per-query performance.
+- Constructs **query–query graphs** from nearest-neighbor relationships  
+- Uses **Sentence-Transformers** for embeddings  
+- Trains **GCN** or **GAT** to predict query effectiveness (MAP/NDCG)  
+- Supports both **linear** and **MLP** prediction heads  
+- Fully automated through **SLURM job scripts**
 
 ---
 
-## ⚙️ Model Components
+## 🧩 Setup
 
-### 1. **BaseGraphConv**
-A simple 2-layer GCN (GraphConv) architecture operating only on Q–Q edges:
-
-```python
-class BaseGraphConv(nn.Module):
-    def __init__(self, hid: int):
-        super().__init__()
-        self.conv1 = GraphConv(-1, hid, aggr='add')
-        self.conv2 = GraphConv(hid, hid, aggr='add')
-        self.act = nn.ReLU()
-        self.drop = nn.Dropout(0.2)
+```bash
+conda create -n gnn python=3.10 -y
+conda activate gnn
+pip install torch torch-geometric faiss-cpu sentence-transformers tqdm
 ```
 
-
-# 🧠 Graph-Based Query Performance Prediction (QPP) — Query-Only Pipeline
-
-This repository provides the full experimental pipeline for **graph-based Query Performance Prediction (QPP)** using **query–query (Q–Q)** relations under the **BM25 baseline**.  
-The pipeline is designed to run efficiently on an **HPC cluster** via the provided **SLURM batch script** (`KGQPP_qq.sh`).
-
----
-
-## 🚀 Overview
-
-This system builds and trains a **Graph Neural Network (GNN)** to estimate query effectiveness (e.g., MAP or NDCG) using **semantic relationships between queries**.  
-Each query node connects to its top-K similar neighbors based on dense embeddings.
-
-### Pipeline Steps
-1. Encode queries using Sentence-Transformers  
-2. Build Q–Q nearest neighbor graphs using FAISS  
-3. Generate JSON datasets for training and evaluation  
-4. Convert them into PyTorch Geometric `.pt` graphs  
-5. Train a GCN (or GAT) for performance prediction  
-6. Evaluate using Pearson, Spearman, and Kendall correlations  
+(Optional for faster sampling):
+```bash
+pip install pyg-lib torch-scatter torch-sparse torch-cluster
+```
 
 ---
 
-## 📁 Project Structure
+## 🚀 Run the Full Pipeline (Recommended)
 
-GNN-QPP/
-│
-├── KGQPP_qq.sh                          # SLURM bash script (main pipeline)
-├── sim_search.py                        # Compute Q–Q similarity with FAISS
-├── make_dataset_qq.py                   # Build MotherDataset JSONs
-├── dataset_builder_qq.py                # Convert JSONs to PyG .pt graphs
-├── train_model_GCN_qq.py                # Train model (GCN backbone)
-├── train_model_GCN_qq_improved.py       # Alternative version with enhancements
-├── correlation.py                       # Compute correlation metrics
-│
-└── dataset/
-├── v1/                              # Query TSVs and supporting files
-├── NNQ/                             # Nearest neighbor JSONs
-├── Bm25/eval/                       # Evaluation metrics (MAP, NDCG)
-└── KGQPP/V1_BM25_OnlyQ/             # Graphs, checkpoints, results
+Submit the main batch script:
+
+```bash
+sbatch KGQPP_qq.sh
+```
+
+### Key Parameters
+```bash
+MODEL=sentence-transformers/msmarco-distilbert-base-v4
+measurement=ndcg        # or map
+topk_qq=10
+hid_d=256
+head=linear             # or mlp
+gnn=GCN                 # or GAT
+```
+
+This script handles:
+1. Nearest-neighbor graph construction  
+2. Dataset and graph building  
+3. Model training  
+4. Correlation evaluation  
+
+---
+
+## 🧠 Manual Example
+
+### 1️⃣ Build Query–Query Neighbors
+```bash
+python sim_search.py   --query_file_main dataset/v1/queries.train.small.tsv   --query_file_search dataset/v1/queries.train.small.tsv   --output_file_json dataset/NNQ/NNQ_distilbert_train_V1.json   --model_name sentence-transformers/msmarco-distilbert-base-v4   --top_k 100
+```
+
+### 2️⃣ Build Graph
+```bash
+python dataset_builder_qq.py   --graph_dataset_path dataset/KGQPP/.../MotherDataset_train_v1_distilbert.json   --out_path dataset/KGQPP/.../graph_train_10_ndcg.pt   --eval_measurement ndcg   --topk_qq 10
+```
+
+### 3️⃣ Train the Model
+```bash
+python train_model_GCN_qq.py   --graph dataset/KGQPP/.../graph_train_10_ndcg.pt   --hid 256 --head linear --epochs 20 --train
+```
+
+### 4️⃣ Evaluate Correlations
+```bash
+python correlation.py   --input dataset/KGQPP/.../cache_GCN_ndcg_linear_256   --collection V1
+```
+
+---
+
+## 📊 Outputs
+
+| File | Description |
+|------|--------------|
+| `gnn_best.pt`, `head_best.pt` | Trained model weights |
+| `preds_trained_{year}.tsv` | Predictions for each test set |
+| `correlation/*.txt` | Pearson/Spearman/Kendall correlations |
+| `output_bash/*.txt` | SLURM log files |
+
+---
+
+## 🔁 Switching to GAT (Optional)
+
+Replace the GCN backbone with **GATv2Conv** in your script:
+```python
+from torch_geometric.nn import GATv2Conv
+```
+Adjust hidden size and heads as needed.
+
+---
+
+## 🧾 Citation
+
+```bibtex
+@article{saleminezhad2025gnnqpp,
+  title={Graph-Based Query Performance Prediction via Query–Query Message Passing},
+  author={Saleminezhad, Abbas and Bagheri, Ebrahim},
+  year={2025},
+  journal={Under Review}
+}
+```
+
+---
+
+## 👤 Author
+
+**Suren (Abbas) Salemi Nezhad**  
+Ph.D. Candidate, Toronto Metropolitan University  
+📧 suren.salemi@torontomu.ca
