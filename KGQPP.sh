@@ -28,40 +28,40 @@ mkdir -p $MAIN_DIR_MODEL
 # -------------------------------
 # Nearest Neighbor Graph Construction (Q–Q)
 # -------------------------------
-# python sim_search.py \
-#     --query_file_main dataset/v1/queries.train.small.tsv \
-#     --query_file_search dataset/v1/queries.train.small.tsv \
-#     --output_file dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.tsv \
-#     --output_file_json dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.json \
-#     --model_name $MODEL \
-#     --top_k 100
-#
-# for year in dev 2019 2020 hard; do
-#     python sim_search.py \
-#         --query_file_main dataset/v1/queries.train.small.tsv \
-#         --query_file_search dataset/trec_data/${year}/${year}_queries.tsv \
-#         --output_file dataset/NNQ/NNQ_${MODEL_NAME}_${year}.tsv \
-#         --output_file_json dataset/NNQ/NNQ_${MODEL_NAME}_${year}.json \
-#         --model_name $MODEL \
-#         --top_k 100
-# done
+python sim_search.py \
+    --query_file_main dataset/v1/queries.train.small.tsv \
+    --query_file_search dataset/v1/queries.train.small.tsv \
+    --output_file dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.tsv \
+    --output_file_json dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.json \
+    --model_name $MODEL \
+    --top_k 100
+
+for year in dev 2019 2020 hard; do
+    python sim_search.py \
+        --query_file_main dataset/v1/queries.train.small.tsv \
+        --query_file_search dataset/trec_data/${year}/${year}_queries.tsv \
+        --output_file dataset/NNQ/NNQ_${MODEL_NAME}_${year}.tsv \
+        --output_file_json dataset/NNQ/NNQ_${MODEL_NAME}_${year}.json \
+        --model_name $MODEL \
+        --top_k 100
+done
 
 # -------------------------------
 # Dataset Construction (JSON)
 # -------------------------------
-# python make_dataset_qq.py \
-#     --query_path dataset/v1/queries.train.small.tsv \
-#     --nnq_path dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.json \
-#     --tsv_eval_path dataset/Bm25/eval/v1/msmarco_v1_train_eval_file.tsv_1000 \
-#     --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_train_v1_${MODEL_NAME}.json
-#
-# for year in dev 2019 2020 hard; do
-#     python make_dataset_qq.py \
-#         --query_path dataset/trec_data/${year}/${year}_queries.tsv \
-#         --nnq_path dataset/NNQ/NNQ_${MODEL_NAME}_${year}.json \
-#         --tsv_eval_path dataset/Bm25/eval/v1/msmarco_v1_${year}_cut1000_eval_file.tsv_1000 \
-#         --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_${year}_${MODEL_NAME}.json
-# done
+python make_dataset_qq.py \
+    --query_path dataset/v1/queries.train.small.tsv \
+    --nnq_path dataset/NNQ/NNQ_${MODEL_NAME}_train_V1.json \
+    --tsv_eval_path dataset/Bm25/eval/v1/msmarco_v1_train_eval_file.tsv_1000 \
+    --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_train_v1_${MODEL_NAME}.json
+
+for year in dev 2019 2020 hard; do
+    python make_dataset_qq.py \
+        --query_path dataset/trec_data/${year}/${year}_queries.tsv \
+        --nnq_path dataset/NNQ/NNQ_${MODEL_NAME}_${year}.json \
+        --tsv_eval_path dataset/Bm25/eval/v1/msmarco_v1_${year}_cut1000_eval_file.tsv_1000 \
+        --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_${year}_${MODEL_NAME}.json
+done
 
 # -------------------------------
 # Graph Construction (.pt)
@@ -69,23 +69,23 @@ mkdir -p $MAIN_DIR_MODEL
 export TOPK_QQ=10
 export MEASUREMENT=ndcg  # or map
 
-# python dataset_builder_qq.py \
-#     --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_train_v1_${MODEL_NAME}.json \
-#     --main_path $MAIN_DIR_MODEL/ \
-#     --out_path "$MAIN_DIR_MODEL/graph_train_${TOPK_QQ}_${MEASUREMENT}.pt" \
-#     --model_name $MODEL \
-#     --eval_measurement $MEASUREMENT \
-#     --topk_qq $TOPK_QQ
-#
-# for year in dev 2019 2020 hard; do
-#     python dataset_builder_qq.py \
-#         --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_${year}_${MODEL_NAME}.json \
-#         --main_path $MAIN_DIR_MODEL/ \
-#         --out_path "$MAIN_DIR_MODEL/graph_${year}_${TOPK_QQ}_${MEASUREMENT}.pt" \
-#         --model_name $MODEL \
-#         --eval_measurement $MEASUREMENT \
-#         --topk_qq $TOPK_QQ
-# done
+python dataset_builder_qq.py \
+    --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_train_v1_${MODEL_NAME}.json \
+    --main_path $MAIN_DIR_MODEL/ \
+    --out_path "$MAIN_DIR_MODEL/graph_train_${TOPK_QQ}_${MEASUREMENT}.pt" \
+    --model_name $MODEL \
+    --eval_measurement $MEASUREMENT \
+    --topk_qq $TOPK_QQ
+
+for year in dev 2019 2020 hard; do
+    python dataset_builder_qq.py \
+        --graph_dataset_path ${MAIN_DIR_MODEL}/MotherDataset_${year}_${MODEL_NAME}.json \
+        --main_path $MAIN_DIR_MODEL/ \
+        --out_path "$MAIN_DIR_MODEL/graph_${year}_${TOPK_QQ}_${MEASUREMENT}.pt" \
+        --model_name $MODEL \
+        --eval_measurement $MEASUREMENT \
+        --topk_qq $TOPK_QQ
+done
 
 # -------------------------------
 # Model Training and Evaluation
